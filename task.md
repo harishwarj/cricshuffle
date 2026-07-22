@@ -1,0 +1,21 @@
+# MongoDB Migration Tasks
+
+- [x] Create server/package.json
+- [x] Create server/index.js
+- [x] Create server/models/Player.js
+- [x] Create server/models/Team.js
+- [x] Create server/models/TournamentConfig.js
+- [x] Create server/models/SpecialAssignment.js
+- [x] Create server/routes/players.js
+- [x] Create server/routes/teams.js
+- [x] Create server/routes/config.js
+- [x] Create server/routes/specialAssignment.js
+- [x] Update src/db.ts (replace Supabase with fetch)
+- [x] Update root .env (add VITE_API_URL)
+- [x] Update root package.json (add concurrently, update dev script)
+- [x] Update .gitignore (add server/.env, server/node_modules)
+- [x] Create README.md
+- [x] npm install (root — concurrently)
+- [x] npm install (server — express, mongoose, cors, dotenv)
+- [x] TypeScript typecheck — PASSED (0 errors)
+- [x] Vite build — PASSED (179 kB bundle)
