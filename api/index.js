@@ -32,15 +32,33 @@ app.use(
 );
 app.use(express.json());
 
+const isServerless = !!process.env.VERCEL || process.env.NODE_ENV === "production";
+
+// ── MongoDB connection ───────────────────────────────────────────────────────
+let cachedDb = null;
+
+async function connectToDatabase() {
+  const MONGODB_URI = process.env.MONGODB_URI;
+  if (!MONGODB_URI) {
+    throw new Error("MONGODB_URI is not set in environment variables. Please configure it in your hosting provider.");
+  }
+  if (cachedDb) {
+    return cachedDb;
+  }
+  const db = await mongoose.connect(MONGODB_URI);
+  cachedDb = db;
+  return db;
+}
+
 // In a serverless environment (like Vercel), we ensure the DB is connected on each request
-if (process.env.NODE_ENV === "production") {
+if (isServerless) {
   app.use(async (req, res, next) => {
     try {
       await connectToDatabase();
       next();
     } catch (error) {
-      console.error("[server] DB connection failed", error);
-      res.status(500).json({ error: "Database connection failed" });
+      console.error("[server] DB connection failed:", error.message);
+      res.status(500).json({ error: "Database connection failed: " + error.message });
     }
   });
 }
@@ -54,29 +72,8 @@ app.use("/api/special-assignment", specialAssignmentRouter);
 // ── Health check ─────────────────────────────────────────────────────────────
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
 
-// ── MongoDB connection + server start ────────────────────────────────────────
-const MONGODB_URI = process.env.MONGODB_URI;
-if (!MONGODB_URI) {
-  console.error(
-    "[server] ERROR: MONGODB_URI is not set. Create server/.env with MONGODB_URI=<your atlas URI>"
-  );
-  process.exit(1);
-}
-
-// Maintain a cached connection for serverless environments
-let cachedDb = null;
-
-async function connectToDatabase() {
-  if (cachedDb) {
-    return cachedDb;
-  }
-  const db = await mongoose.connect(MONGODB_URI);
-  cachedDb = db;
-  return db;
-}
-
 // In local development, we connect once and start listening.
-if (process.env.NODE_ENV !== "production") {
+if (!isServerless) {
   connectToDatabase()
     .then(() => {
       console.log("[server] Connected to MongoDB");
