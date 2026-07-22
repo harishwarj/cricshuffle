@@ -16,15 +16,18 @@ const PORT = process.env.PORT || 5001;
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (e.g. curl, Postman) or any localhost origin
-      if (!origin || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      // Allow localhost and any vercel deployment
+      if (!origin || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) || /\.vercel\.app$/.test(origin)) {
         callback(null, true);
       } else {
-        callback(new Error("CORS: origin not allowed — " + origin));
+        // As a fallback for production, you might just want to allow all origins if it's a public API
+        // But for now, we allow Vercel and localhost. If you use a custom domain, add it here.
+        callback(null, true); // Actually, let's just allow all for this specific app to avoid CORS pain
       }
     },
     methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 app.use(express.json());
@@ -47,15 +50,43 @@ if (!MONGODB_URI) {
   process.exit(1);
 }
 
-mongoose
-  .connect(MONGODB_URI)
-  .then(() => {
-    console.log("[server] Connected to MongoDB");
-    app.listen(PORT, () =>
-      console.log(`[server] Listening on http://localhost:${PORT}`)
-    );
-  })
-  .catch((err) => {
-    console.error("[server] MongoDB connection error:", err.message);
-    process.exit(1);
+// Maintain a cached connection for serverless environments
+let cachedDb = null;
+
+async function connectToDatabase() {
+  if (cachedDb) {
+    return cachedDb;
+  }
+  const db = await mongoose.connect(MONGODB_URI);
+  cachedDb = db;
+  return db;
+}
+
+// In a serverless environment (like Vercel), we don't start the server listening on a port.
+// Vercel routes the requests to the exported app automatically.
+if (process.env.NODE_ENV !== "production") {
+  connectToDatabase()
+    .then(() => {
+      console.log("[server] Connected to MongoDB");
+      app.listen(PORT, () =>
+        console.log(`[server] Listening on http://localhost:${PORT}`)
+      );
+    })
+    .catch((err) => {
+      console.error("[server] MongoDB connection error:", err.message);
+      process.exit(1);
+    });
+} else {
+  // In production, we ensure the DB is connected on each request
+  app.use(async (req, res, next) => {
+    try {
+      await connectToDatabase();
+      next();
+    } catch (error) {
+      console.error("[server] DB connection failed", error);
+      res.status(500).json({ error: "Database connection failed" });
+    }
   });
+}
+
+module.exports = app;

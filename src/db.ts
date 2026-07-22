@@ -1,8 +1,8 @@
 import { Player, TeamResult, TeamSetup } from "./types";
 
 // Base URL for the Express API — set VITE_API_URL in your root .env file
-// Falls back to http://localhost:5000 for local development
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:5000";
+// Falls back to http://localhost:5001 for local development, and relative `/` for production
+const API_URL = import.meta.env.VITE_API_URL ?? (import.meta.env.PROD ? "" : "http://localhost:5001");
 
 // ── Helper ────────────────────────────────────────────────────────────────────
 
