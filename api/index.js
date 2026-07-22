@@ -32,6 +32,19 @@ app.use(
 );
 app.use(express.json());
 
+// In a serverless environment (like Vercel), we ensure the DB is connected on each request
+if (process.env.NODE_ENV === "production") {
+  app.use(async (req, res, next) => {
+    try {
+      await connectToDatabase();
+      next();
+    } catch (error) {
+      console.error("[server] DB connection failed", error);
+      res.status(500).json({ error: "Database connection failed" });
+    }
+  });
+}
+
 // ── Routes ──────────────────────────────────────────────────────────────────
 app.use("/api/players", playersRouter);
 app.use("/api/teams", teamsRouter);
@@ -62,8 +75,7 @@ async function connectToDatabase() {
   return db;
 }
 
-// In a serverless environment (like Vercel), we don't start the server listening on a port.
-// Vercel routes the requests to the exported app automatically.
+// In local development, we connect once and start listening.
 if (process.env.NODE_ENV !== "production") {
   connectToDatabase()
     .then(() => {
@@ -76,17 +88,6 @@ if (process.env.NODE_ENV !== "production") {
       console.error("[server] MongoDB connection error:", err.message);
       process.exit(1);
     });
-} else {
-  // In production, we ensure the DB is connected on each request
-  app.use(async (req, res, next) => {
-    try {
-      await connectToDatabase();
-      next();
-    } catch (error) {
-      console.error("[server] DB connection failed", error);
-      res.status(500).json({ error: "Database connection failed" });
-    }
-  });
 }
 
 module.exports = app;
