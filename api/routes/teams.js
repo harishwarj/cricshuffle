@@ -12,6 +12,7 @@ router.get("/", async (_req, res) => {
     const result = teams.map((t) => ({
       name: t.name,
       captain: t.captain,
+      viceCaptain: t.viceCaptain,
       players: t.players,
     }));
     res.json(result);
@@ -39,6 +40,7 @@ router.post("/", async (req, res) => {
     const docs = teams.map((t) => ({
       name: t.name,
       captain: t.captain,
+      viceCaptain: t.viceCaptain,
       players: t.players ?? [],
     }));
     await Team.insertMany(docs);
