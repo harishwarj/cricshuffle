@@ -1,5 +1,5 @@
 import { TeamResult } from "../types";
-import { Star, Crown, Printer } from "lucide-react";
+import { Star, Crown, Shield, Printer } from "lucide-react";
 
 function Stars({ n }: { n: number }) {
   return (
@@ -45,8 +45,8 @@ export function FinalTeams({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 print-page">
         {teams.map((t, i) => {
-          const counts = { 5: 0, 4: 0, 3: 0 };
-          for (const p of t.players) counts[p.stars]++;
+          const counts: Record<number, number> = { 5: 0, 4: 0, 3: 0, 2: 0 };
+          for (const p of t.players) counts[p.stars] = (counts[p.stars] ?? 0) + 1;;
           return (
             <div
               key={i}
@@ -56,12 +56,20 @@ export function FinalTeams({
                 <h3 className="font-bold text-base">{t.name}</h3>
               </div>
               <div className="p-3">
-                <div className="flex items-center justify-between bg-orange-50 rounded-lg px-3 py-2 mb-2">
+                <div className="flex items-center justify-between bg-orange-50 rounded-lg px-3 py-2 mb-1.5">
                   <span className="flex items-center gap-1.5 font-semibold text-orange-800 text-sm">
                     <Crown size={15} /> {t.captain.name}
                   </span>
                   <span className="text-[11px] font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">
                     Captain
+                  </span>
+                </div>
+                <div className="flex items-center justify-between bg-blue-50 rounded-lg px-3 py-2 mb-2">
+                  <span className="flex items-center gap-1.5 font-semibold text-blue-800 text-sm">
+                    <Shield size={15} /> {t.viceCaptain.name}
+                  </span>
+                  <span className="text-[11px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">
+                    Vice Captain
                   </span>
                 </div>
                 <ul className="divide-y divide-slate-100">
@@ -76,12 +84,13 @@ export function FinalTeams({
                   ))}
                 </ul>
                 <div className="mt-2 pt-2 border-t border-slate-100 text-[11px] font-semibold text-slate-600">
-                  ⭐5: {counts[5]} | ⭐4: {counts[4]} | ⭐3: {counts[3]}
+                  ⭐5: {counts[5]} | ⭐4: {counts[4]} | ⭐3: {counts[3]} | ⭐2: {counts[2]}
                 </div>
               </div>
             </div>
           );
         })}
+
       </div>
     </div>
   );

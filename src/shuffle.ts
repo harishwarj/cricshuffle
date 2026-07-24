@@ -24,8 +24,9 @@ function distributeByStar(
     5: fisherYates(pool.filter((p) => p.stars === 5)),
     4: fisherYates(pool.filter((p) => p.stars === 4)),
     3: fisherYates(pool.filter((p) => p.stars === 3)),
+    2: fisherYates(pool.filter((p) => p.stars === 2)),
   };
-  const starOrder: StarLevel[] = [5, 4, 3];
+  const starOrder: StarLevel[] = [5, 4, 3, 2];
   const teamCount = teams.length;
 
   for (const star of starOrder) {
@@ -87,20 +88,24 @@ function distributeByStar(
 export function shuffleTeams(
   teamNames: string[],
   captains: Player[],
+  viceCaptains: Player[],
   pool: Player[],
   playersPerTeam: number,
   special?: SpecialAssignment | null
 ): ShuffleResult {
-  // Team names and captains are in fixed order (user-assigned).
+  // Team names, captains, and vice captains are in fixed order (user-assigned).
   // captains[i] is the captain for teamNames[i].
+  // viceCaptains[i] is the vice captain for teamNames[i].
   const teamCount = teamNames.length;
   const teams: TeamResult[] = teamNames.map((name, i) => ({
     name,
     captain: captains[i],
+    viceCaptain: viceCaptains[i],
     players: [],
   }));
 
-  const slotsPerTeam = playersPerTeam - 1;
+  // Each team slot count = playersPerTeam - captain - vice captain = playersPerTeam - 2
+  const slotsPerTeam = playersPerTeam - 2;
   const remaining = new Array(teamCount).fill(slotsPerTeam);
 
   let workingPool = [...pool];
@@ -142,8 +147,9 @@ export function shuffleTeams(
           5: fisherYates(harishwarPool.filter((p) => p.stars === 5)),
           4: fisherYates(harishwarPool.filter((p) => p.stars === 4)),
           3: fisherYates(harishwarPool.filter((p) => p.stars === 3)),
+          2: fisherYates(harishwarPool.filter((p) => p.stars === 2)),
         };
-        const order: StarLevel[] = [5, 4, 3];
+        const order: StarLevel[] = [5, 4, 3, 2];
         const used = new Set<string>();
         while (remaining[harishwarTeamIndex] > 0) {
           let progressed = false;
@@ -185,8 +191,9 @@ export function shuffleTeams(
         5: fisherYates(workingPool.filter((p) => p.stars === 5)),
         4: fisherYates(workingPool.filter((p) => p.stars === 4)),
         3: fisherYates(workingPool.filter((p) => p.stars === 3)),
+        2: fisherYates(workingPool.filter((p) => p.stars === 2)),
       };
-      const starOrder: StarLevel[] = [5, 4, 3];
+      const starOrder: StarLevel[] = [5, 4, 3, 2];
       for (const star of starOrder) {
         const group = byStar[star];
         let idx = 0;

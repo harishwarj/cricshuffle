@@ -79,7 +79,7 @@ export function ManagePlayers({
             className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
           />
           <div className="flex items-center gap-1">
-            {[3, 4, 5].map((s) => (
+            {[2, 3, 4, 5].map((s) => (
               <button
                 key={s}
                 type="button"

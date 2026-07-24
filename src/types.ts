@@ -1,4 +1,4 @@
-export type StarLevel = 3 | 4 | 5;
+export type StarLevel = 2 | 3 | 4 | 5;
 
 export interface Player {
   id: string;
@@ -15,6 +15,7 @@ export interface TeamSetup {
 export interface TeamResult {
   name: string;
   captain: Player;
+  viceCaptain: Player;
   players: Player[];
 }
 

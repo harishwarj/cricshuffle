@@ -27,6 +27,7 @@ export function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [setup, setSetup] = useState<TeamSetup | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
   const [captains, setCaptains] = useState<string[]>([]);
+  const [viceCaptains, setViceCaptains] = useState<string[]>([]);
   const [teams, setTeams] = useState<TeamResult[] | null>(null);
   const [special, setSpecial] = useState<SpecialAssignment | null>(null);
   const [loading, setLoading] = useState(true);
@@ -76,14 +77,16 @@ export function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     await db.deletePlayer(id);
     setPlayers((prev) => prev.filter((x) => x.id !== id));
     setSelected((prev) => prev.filter((x) => x !== id));
-    // Clear this player from any captain slot
+    // Clear this player from any captain / vice captain slot
     setCaptains((prev) => prev.map((c) => (c === id ? "" : c)));
+    setViceCaptains((prev) => prev.map((c) => (c === id ? "" : c)));
   }
   async function clearAllPlayers() {
     await db.clearAllPlayers();
     setPlayers([]);
     setSelected([]);
     setCaptains([]);
+    setViceCaptains([]);
   }
 
   // ---- config ----
@@ -98,6 +101,9 @@ export function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   }
   function setCaptainsState(s: string[]) {
     setCaptains(s);
+  }
+  function setViceCaptainsState(s: string[]) {
+    setViceCaptains(s);
   }
 
   // ---- shuffle ----
@@ -119,9 +125,22 @@ export function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     const captainPlayers = setup.teamNames.map((_, i) =>
       players.find((p) => p.id === captains[i])!
     );
+    // vice captains[i] = player id for teamNames[i] — preserve the order
+    const missingVCIdx = (setup.teamNames ?? []).findIndex(
+      (_, i) => !viceCaptains[i]
+    );
+    if (missingVCIdx !== -1) {
+      throw new Error(
+        `No vice captain assigned for "${setup.teamNames[missingVCIdx]}"`
+      );
+    }
+    const viceCaptainPlayers = setup.teamNames.map((_, i) =>
+      players.find((p) => p.id === viceCaptains[i])!
+    );
     const captainIds = new Set(captains.slice(0, setup.teamCount));
+    const viceCaptainIds = new Set(viceCaptains.slice(0, setup.teamCount));
     const poolPlayers = players.filter(
-      (p) => selected.includes(p.id) && !captainIds.has(p.id)
+      (p) => selected.includes(p.id) && !captainIds.has(p.id) && !viceCaptainIds.has(p.id)
     );
 
     // Always fetch the latest special assignment fresh so we pick up
@@ -137,6 +156,7 @@ export function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     const result = shuffleTeams(
       setup.teamNames,
       captainPlayers,
+      viceCaptainPlayers,
       poolPlayers,
       setup.playersPerTeam,
       freshSpecial
@@ -218,6 +238,8 @@ export function AdminDashboard({ onLogout }: { onLogout: () => void }) {
             setSelected={setSelectedState}
             captains={captains}
             setCaptains={setCaptainsState}
+            viceCaptains={viceCaptains}
+            setViceCaptains={setViceCaptainsState}
             onShuffle={onShuffle}
             goToResults={() => setTab("final")}
             push={push}
