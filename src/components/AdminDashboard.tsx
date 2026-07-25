@@ -166,14 +166,39 @@ export function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     return result.teams;
   }
 
-  async function onShuffle() {
+  async function onShuffle(prebuiltTeams?: TeamResult[]) {
     try {
-      await runShuffle();
-      push("Teams generated!", "success");
+      if (prebuiltTeams && prebuiltTeams.length > 0) {
+        // Single shuffle mode: teams are already built client-side, just persist them
+        await db.saveTeams(prebuiltTeams);
+        setTeams(prebuiltTeams);
+        push("Teams finalized!", "success");
+      } else {
+        // Full shuffle mode: run the server-side star-balanced distribution
+        await runShuffle();
+        push("Teams generated!", "success");
+      }
     } catch (e: any) {
       push(e.message || "Shuffle failed", "error");
       throw e;
     }
+  }
+
+  async function onReplacePlayer(
+    teamIdx: number,
+    oldPlayerId: string,
+    newPlayer: Player
+  ) {
+    if (!teams) return;
+    const updated = teams.map((t, i) => {
+      if (i !== teamIdx) return t;
+      return {
+        ...t,
+        players: t.players.map((p) => (p.id === oldPlayerId ? newPlayer : p)),
+      };
+    });
+    await db.saveTeams(updated);
+    setTeams(updated);
   }
 
   if (loading) {
@@ -243,11 +268,14 @@ export function AdminDashboard({ onLogout }: { onLogout: () => void }) {
             onShuffle={onShuffle}
             goToResults={() => setTab("final")}
             push={push}
+            special={special}
           />
         )}
         {tab === "final" && (
           <FinalTeams
             teams={teams ?? []}
+            allPlayers={players}
+            onReplacePlayer={onReplacePlayer}
             push={push}
           />
         )}

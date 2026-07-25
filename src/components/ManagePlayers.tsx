@@ -78,20 +78,19 @@ export function ManagePlayers({
             placeholder="Player name"
             className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
           />
-          <div className="flex items-center gap-1">
-            {[2, 3, 4, 5].map((s) => (
+          <div className="flex items-center gap-1 flex-wrap">
+            {([2, 2.5, 3, 3.5, 4, 4.5, 5] as StarLevel[]).map((s) => (
               <button
                 key={s}
                 type="button"
                 onClick={() => setStars(s as StarLevel)}
-                className={`flex items-center gap-0.5 px-2.5 py-2 rounded-lg border text-sm font-semibold transition ${
+                className={`flex items-center gap-0.5 px-2 py-2 rounded-lg border text-xs font-semibold transition ${
                   stars === s
                     ? "bg-orange-500 text-white border-orange-500"
                     : "bg-white text-slate-600 border-slate-300 hover:border-orange-300"
                 }`}
               >
-                {s}
-                <Star size={14} fill={stars === s ? "currentColor" : "none"} />
+                {s}<Star size={12} fill={stars === s ? "currentColor" : "none"} />
               </button>
             ))}
           </div>
@@ -136,10 +135,12 @@ export function ManagePlayers({
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="flex items-center gap-0.5 text-orange-500">
-                    {Array.from({ length: p.stars }).map((_, i) => (
-                      <Star key={i} size={14} fill="currentColor" />
+                  <span className="flex items-center gap-0.5 text-orange-500 text-xs font-semibold">
+                    {Array.from({ length: Math.floor(p.stars) }).map((_, i) => (
+                      <Star key={i} size={13} fill="currentColor" />
                     ))}
+                    {p.stars % 1 !== 0 && <span className="text-[10px] leading-none">½</span>}
+                    <span className="ml-0.5 text-slate-500">({p.stars})</span>
                   </span>
                   <button
                     onClick={() => remove(p.id)}

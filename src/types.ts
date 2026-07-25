@@ -1,4 +1,4 @@
-export type StarLevel = 2 | 3 | 4 | 5;
+export type StarLevel = 2 | 2.5 | 3 | 3.5 | 4 | 4.5 | 5;
 
 export interface Player {
   id: string;
@@ -20,6 +20,8 @@ export interface TeamResult {
 }
 
 export type AuthRole = "alpha" | "superadmin" | null;
+
+export type ShuffleMode = "full" | "single";
 
 export interface SpecialAssignment {
   enabled: boolean;
