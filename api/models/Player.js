@@ -5,7 +5,7 @@ const playerSchema = new mongoose.Schema(
     // Frontend-generated string ID (not MongoDB's _id)
     id: { type: String, required: true, unique: true },
     name: { type: String, required: true },
-    starLevel: { type: Number, enum: [2, 3, 4, 5], required: true },
+    starLevel: { type: Number, enum: [2, 2.5, 3, 3.5, 4, 4.5, 5], required: true },
     isCaptain: { type: Boolean, default: false },
     isSelected: { type: Boolean, default: false },
     teamId: { type: String, default: null },
