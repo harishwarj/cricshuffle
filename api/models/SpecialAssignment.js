@@ -7,7 +7,7 @@ const specialAssignmentSchema = new mongoose.Schema({
   forcedCaptainName: { type: String, default: "Harishwar" },
   forcedPlayerNames: {
     type: [String],
-    default: ["Roshan", "Hari Krishnan", "Suresh", "Rahul"],
+    default: ["Roshan", "Hari Krishnan", "Dhanush", "Vijay Prakash"],
   },
 });
 

@@ -5,7 +5,7 @@ const SpecialAssignment = require("../models/SpecialAssignment");
 const DEFAULTS = {
   enabled: false,
   forcedCaptainName: "Harishwar",
-  forcedPlayerNames: ["Roshan", "Hari Krishnan", "Suresh", "Rahul"],
+  forcedPlayerNames: ["Roshan", "Hari Krishnan", "Dhanush", "Vijay Prakash"],
 };
 
 // GET /api/special-assignment — return current state or defaults
